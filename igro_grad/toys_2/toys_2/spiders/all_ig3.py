@@ -1,29 +1,34 @@
 import scrapy
 
+
 class ToysSpider(scrapy.Spider):
     name = 'IgroGrad3'
     start_urls = ['https://igro-grad.ru/catalog/']
 
-    def parse(self,response):
+    def parse(self, response):
 
-         for i in range(11):
-            catalog = response.css(f'div.item_block:nth-child({i}) a::attr(href)').get()
-            # Здесь мы находимся на странице каталога - но далее команда думает что мы уже на одной из страниц каталога, как перейти на другую страницу ? похоже как в последнем цикле
+        # по темам
+        for i in range(1, 11):
+            link = response.css(f'div.item_block:nth-child({i}) a::attr(href)').get()
+            print(link, "   00000000000000")
+            yield response.follow(link, callback=self.parse_list)
 
-            mm = response.css('div.item-title a::attr(href)').getall()
+    def parse_list(self, response):
+        mm = response.css('div.item-title a::attr(href)').getall()
+        # ссылки по странице на товары
+        for link in mm:
+            yield response.follow(link, callback=self.parse_toys)
 
-            for link in mm:
-                yield response.follow(link, callback=self.parse_toys)
-
-            for i in range(1, int(response.css('div.nums a::text')[-1].get())+1): #количество страниц
-                next_page = f'https://igro-grad.ru/{catalog}/?PAGEN_1={i}'
-                yield response.follow(next_page, callback=self.parse)
-
+        # по страницам категории
+        for i in range(1, int(response.css('div.nums a::text')[-1].get()) + 1):  # количество страниц
+            next_page = f'?PAGEN_1={i}'
+            print("999999999999  ", next_page)
+            yield response.follow(next_page, callback=self.parse_list)
 
     def parse_toys(self, response):
         # table description
         res = response.css('div.char_block')
-        if len(res)>0:
+        if len(res) > 0:
             par_dict = {}
             for r in res.css('tr'):
                 w0 = r.css('span::text')[0].get().strip()
@@ -44,11 +49,11 @@ class ToysSpider(scrapy.Spider):
             detail_text[i] = str(detail_text[i]).replace('\n', '')
 
         yield {
-            'name':response.css('div.element-share-title h1::text').get().strip(),
-            'detail_text':detail_text,
+            'name': response.css('div.element-share-title h1::text').get().strip(),
+            'detail_text': detail_text,
             # table description
-            'description':par_dict,
-            'number':response.css('div.article span::text')[1].get(),
-            'price':response.css('span.price_value::text').get(),
-            'count_toys':count_toys,
+            'description': par_dict,
+            'number': response.css('div.article span::text')[1].get(),
+            'price': response.css('span.price_value::text').get(),
+            'count_toys': count_toys,
         }

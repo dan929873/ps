@@ -14,6 +14,7 @@ class ToysSpider(scrapy.Spider):
         #     if mm[m].find('/?oid=') > 0:
         #         mm[m] = '/'.join(mm[m].split('/')[:-1]) + '/'
         for link in mm:
+            print(link,"-----------------")
             yield response.follow(link, callback=self.parse_toys)
 
         for i in range(1, int(response.css('div.nums a::text')[-1].get())+1):
