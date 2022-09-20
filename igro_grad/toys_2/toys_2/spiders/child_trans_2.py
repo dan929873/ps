@@ -1,12 +1,13 @@
 import scrapy
 
-# scrapy shell "url"
-# scrapy crawl IgroGrad
+# scrapy shell "https://igro-grad.ru/catalog/aktsii/"
+# scrapy crawl IgroGradtestURL -O IgroGradtestURL.csv
 
 class ToysSpider(scrapy.Spider):
     name = 'IgroGradtestURL'
-    # start_urls = ['https://igro-grad.ru/catalog/aktsii/', 'https://igro-grad.ru/catalog/kantstovary/', 'https://igro-grad.ru/catalog/igrushki/', 'https://igro-grad.ru/catalog/otdykh_i_sport/', 'https://igro-grad.ru/catalog/odezhda_i_obuv/']
-    start_urls = ['https://igro-grad.ru/catalog/aktsii/',]
+    allowed_domains = ['igro-grad.ru']
+    start_urls = ['https://igro-grad.ru/catalog/kantstovary/', 'https://igro-grad.ru/catalog/igrushki/', 'https://igro-grad.ru/catalog/otdykh_i_sport/', 'https://igro-grad.ru/catalog/odezhda_i_obuv/']
+    # start_urls = ['https://igro-grad.ru/catalog/kantstovary/',]
 
     def parse(self,response):
 
@@ -17,7 +18,7 @@ class ToysSpider(scrapy.Spider):
 
         for i in range(1, int(response.css('div.nums a::text')[-1].get())+1):
             # нужно сделать строку с категорией и страницей
-            next_page = f'{response[:response.find("/", 29)]}/?PAGEN_1={i}'
+            next_page = (f'{str(response)[5:str(response).find("/", 35)]}/?PAGEN_1={i}')
             print("----------", next_page)
             yield response.follow(next_page, callback=self.parse)
 
