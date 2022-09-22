@@ -6,7 +6,17 @@ import scrapy
 class ToysSpider(scrapy.Spider):
     name = 'IgroGradtestURL'
     allowed_domains = ['igro-grad.ru']
-    start_urls = ['https://igro-grad.ru/catalog/kantstovary/', 'https://igro-grad.ru/catalog/igrushki/', 'https://igro-grad.ru/catalog/otdykh_i_sport/', 'https://igro-grad.ru/catalog/odezhda_i_obuv/']
+    start_urls = ['https://igro-grad.ru/catalog/kantstovary/',
+                  'https://igro-grad.ru/catalog/igrushki/',
+                  'https://igro-grad.ru/catalog/otdykh_i_sport/',
+                  'https://igro-grad.ru/catalog/odezhda_i_obuv/',
+                  'https://igro-grad.ru/catalog/tovary_dlya_detey/',
+                  'https://igro-grad.ru/catalog/tvorchestvo_i_razvitie/',
+                  'https://igro-grad.ru/catalog/detskiy_transport/',
+                  'https://igro-grad.ru/catalog/1000_melochey/',
+                  'https://igro-grad.ru/catalog/prazdniki/',
+                  'https://igro-grad.ru/catalog/torgovoe_oborudovanie/',
+                  'https://igro-grad.ru/catalog/novoe_postuplenie/']
     # start_urls = ['https://igro-grad.ru/catalog/kantstovary/',]
 
     def parse(self,response):
@@ -46,8 +56,10 @@ class ToysSpider(scrapy.Spider):
         for i in range(len(detail_text)):
             detail_text[i] = str(detail_text[i]).replace('\n', '')
 
+        way = str(response)[str(response).find("catalog") + len("catalog/"):]
+
         yield {
-            'category':response.css('#bx_breadcrumb_2 > a > span:nth-child(1)::text').get(),
+            'category':way[:way.find("/")],
             'name':response.css('div.element-share-title h1::text').get().strip(),
             'detail_text':detail_text,
             # table description
@@ -56,3 +68,5 @@ class ToysSpider(scrapy.Spider):
             'price':response.css('span.price_value::text').get(),
             'count_toys':count_toys,
         }
+
+
